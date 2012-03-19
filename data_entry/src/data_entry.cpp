@@ -13,6 +13,7 @@ using namespace std;
 
 class data_entry{
 public:
+	data_entry();
 	template<typename Type>
 	void GetInput(Type &destination, std::string prompt);
 	void WriteShipFile();
@@ -47,13 +48,16 @@ void data_entry::GetInput(Type &destination, std::string prompt) {
 	}
 }
 void data_entry::WriteShipFile(){
-	std::string filename;
-	filename  = mmsi;
-	ofstream file (filename);
+	std::stringstream tmpstr;
+	tmpstr << mmsi;
+	string filename = tmpstr.str();
+	ofstream file (filename.c_str());
+	file << mmsi << endl << name << endl << lat << endl << lng << endl << course << endl << speed;
+	file.close();
 }
 
 void data_entry::getInformation(){
-	std::cout << "Please enter information about a ship/n";
+	std::cout << "Please enter information about a ship\n";
 	GetInput(mmsi, "MMSI: ");
 	GetInput(name, "Ship Name: ");
 	GetInput(lat, "Latitude(in the format (-)xx.xxx): ");
@@ -65,5 +69,6 @@ void data_entry::getInformation(){
 int main() {
 	data_entry dataentry;
 	dataentry.getInformation();
+	dataentry.WriteShipFile();
 }
 
