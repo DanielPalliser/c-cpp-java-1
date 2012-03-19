@@ -4,7 +4,7 @@
 
 -include ../makefile.init
 
-RM := rm -rf
+RM := rm
 
 # All of the sources participating in the build are defined here
 -include sources.mk
@@ -38,19 +38,19 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: data_entry
+all: 
 
 # Tool invocations
-data_entry: $(OBJS) $(USER_OBJS)
+: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++  -o "data_entry" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++  -o  $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(OBJS)$(C++_DEPS)$(C_DEPS)$(CC_DEPS)$(CPP_DEPS)$(EXECUTABLES)$(CXX_DEPS)$(C_UPPER_DEPS) data_entry
+	-$(RM) $(OBJS)$(C++_DEPS)$(C_DEPS)$(CC_DEPS)$(CPP_DEPS)$(EXECUTABLES)$(CXX_DEPS)$(C_UPPER_DEPS) 
 	-@echo ' '
 
 .PHONY: all clean dependents
