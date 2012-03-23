@@ -49,7 +49,7 @@ void data_entry::GetInput(Type &destination, std::string prompt) {
 }
 void data_entry::WriteShipFile(){
 	std::stringstream tmpstr;
-	tmpstr << mmsi;
+	tmpstr << mmsi << ".shp";
 	string filename = tmpstr.str();
 	ofstream file (filename.c_str());
 	file << mmsi << endl << name << endl << lat << endl << lng << endl << course << endl << speed;

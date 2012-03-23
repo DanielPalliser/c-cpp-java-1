@@ -2,7 +2,6 @@ package ddp10.aber.ac.uk;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
@@ -26,7 +25,6 @@ public class Ship {
 	}
 
 	protected Ship(File shipFile) throws IOException {
-		Boolean ret = true;
 		BufferedReader br = new BufferedReader(new FileReader(shipFile));
 		this.mmsi = br.readLine();
 		this.name = br.readLine();

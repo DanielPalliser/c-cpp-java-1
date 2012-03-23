@@ -16,7 +16,6 @@ public class ShipFinder {
 	private Scanner scan = new Scanner(System.in);
 
 	private void runShipFinding() {
-		String searchTerm;
 		while (true) {
 			System.out.println("Do you want to search for MMSI or ship Name?"
 					+ " type \"MMSI\" \"Name\" or \"q\" to quit");
@@ -29,7 +28,6 @@ public class ShipFinder {
 				search(searchField);
 			} else if (choice.equalsIgnoreCase("name")) {
 				System.out.println("please enter the name of the ship");
-				searchTerm = scan.nextLine();
 				Integer searchField = new Integer(0);
 				search(searchField);
 			}
