@@ -4,7 +4,7 @@
 // Version     :
 // Description : Hello World in C++, Ansi-style
 //============================================================================
-
+#include <limits>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -22,12 +22,16 @@ public:
 	void runMenu();
 private:
 	int mmsi, course;
-	std::string response, name;
+	std::string response;
 	float lat, lng, speed;
-	template<typename Type>
-	void getInput(Type &destination, std::string prompt);
+	char name[256];
+	void getInput(char* destination, std::string prompt);
 	void writeShipFile();
 	void getInformation();
+
+	template<typename Type>
+	void getInput(Type &destination, std::string prompt);
+
 };
 
 data_entry::data_entry() {
@@ -53,24 +57,28 @@ void data_entry::getInformation() {
 template<typename Type>
 void data_entry::getInput(Type &destination, std::string prompt) {
 	while (1) {
-
 		std::cout << prompt;
-		std::string temporaryHolder;
+		char temporaryHolder[256];
 		std::stringstream stringStream;
-
-		std::getline(std::cin, temporaryHolder);
+		cin.getline(temporaryHolder,256,'\n');
 		stringStream << temporaryHolder;
-
 		if (stringStream >> destination) {
 			break;
 		}
 	}
 }
+
+void data_entry::getInput(char* destination, std::string prompt) {
+	cout << prompt;
+	cin.getline(destination,256);
+}
+
+
 /**
  * writes a ship file from the data input by the user
  */
 void data_entry::writeShipFile() {
-	int fd = open("test.txt", O_RDWR);
+	int fd = open("log.txt", (O_RDWR | O_CREAT | O_APPEND), 0664);
 	if (fd == -1) {
 		cout << "File descriptor error";
 		exit(1);
@@ -92,9 +100,16 @@ void data_entry::writeShipFile() {
 		file << mmsi << endl << name << endl << lat << endl << lng << endl
 				<< course << endl << speed;
 		file.close();
-		FILE* text = fdopen(fd, "a");
+		FILE* log = fdopen(fd, "a");
+		time_t t = time(NULL); //current time
+		struct tm* now = gmtime(&t);
+		stringstream logstrm;
+		logstrm << asctime(now) << " Ship with mmsi " << mmsi << " was updated"<< endl;
+		string logstr = logstrm.str();
+		fprintf(log, "%s", logstr.c_str());
 		fcntl(fd, F_SETLKW, file_lock(F_UNLCK, SEEK_SET));
-		fclose(text);
+		fclose(log);
+		cout << "ship information saved to file";
 	}
 }
 
@@ -104,11 +119,14 @@ void data_entry::writeShipFile() {
 void data_entry::runMenu() {
 	char choice = '\0';
 	while (choice != 'q' && choice != 'Q') {
+
 		std::cout
-				<< "\nChoose an option: \n E: enter ship information \n S: save information to a file \n Q: quit";
+				<< "\nChoose an option: \n E: enter ship information \n S: save information to a file \n Q: quit \n";
+		cin >> choice;
 		switch (choice) {
 		case 'e':
 		case 'E':
+			cin.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
 			getInformation();
 			break;
 		case 's':

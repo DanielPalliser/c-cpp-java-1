@@ -5,6 +5,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Scanner;
 import java.util.Vector;
 import java.io.FileOutputStream;
@@ -40,24 +43,30 @@ public class ShipFinder {
 		String searchTerm; // search for ships matching search term
 		searchTerm = scan.nextLine();
 		try {
-			FileOutputStream fos = new FileOutputStream("test.txt", true);
+			FileOutputStream fos = new FileOutputStream("log.txt", true);
 			FileLock fl = fos.getChannel().tryLock();
 			if (fl != null) {
 				Vector<Ship> ships = searchWorkingDir(searchTerm, searchField);
 				for (Ship ship : ships) { // print out information about ships
 					System.out.println(ship.toString());
+					FileWriter fw = new FileWriter(fos.getFD());
+					DateFormat dateFormat = new SimpleDateFormat("EEE MMM DD HH:mm:ss yyyy");
+					Date date = new Date();
+					StringBuffer logRecord = new StringBuffer(dateFormat.format(date));
+					logRecord.append("\n Search was made for ships with ");
+					if (searchField == 0){
+						logRecord.append("mmsi of");
+					}else {
+						logRecord.append("name of");
+					}
+					logRecord.append(searchTerm);
+					logRecord.append("\n");
+					fw.write(logRecord.toString());
+					fl.release();
+					fw.close();
 				}
-			}
-			FileWriter fw = new FileWriter(fos.getFD());
-			StringBuffer logRecord = new StringBuffer("search was made for ships with ");
-			if (searchField == 0){
-				logRecord.append("mmsi ");
-			}else {
-				logRecord.append("name ");
-			}
-			logRecord.append(searchTerm);
-			logRecord.append("\n");
-			fw.write(logRecord.toString());
+			}else System.out.println("Another program is accessing ship files");
+			
 		} catch (IOException e) {
 
 		}
@@ -76,8 +85,7 @@ public class ShipFinder {
 		File workingDir = new File(System.getProperty("user.dir"));
 		String[] children = workingDir.list();
 		for (String s : children) { // for each file
-			System.err.println(s);
-			if (s.matches("*.shp")) { // check file is a ship file
+			if (s.matches(".\\.shp")) { // check file is a ship file
 				File shipFile = new File(s); // try to read in file
 				try {
 					Ship ship = new Ship(shipFile);
