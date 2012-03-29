@@ -7,6 +7,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
 import java.util.Vector;
+import java.io.FileOutputStream;
+import java.nio.channels.*;
 
 public class ShipFinder {
 
@@ -28,7 +30,7 @@ public class ShipFinder {
 				search(searchField);
 			} else if (choice.equalsIgnoreCase("name")) {
 				System.out.println("please enter the name of the ship");
-				Integer searchField = new Integer(0);
+				Integer searchField = new Integer(1);
 				search(searchField);
 			}
 		}
@@ -37,28 +39,28 @@ public class ShipFinder {
 	private void search(Integer searchField) {
 		String searchTerm; // search for ships matching search term
 		searchTerm = scan.nextLine();
-		Vector<Ship> ships = searchWorkingDir(searchTerm, searchField);
-		for (Ship ship : ships) { // print out information about ships
-			System.out.println(ship.toString());
-		}
-		try { // write to log file
-			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(
-					"log.txt")));
-			StringBuffer str = new StringBuffer(
-					"Search was made for ships with ");
-			if (0 == searchField) {
-				str.append("an MMSI ");
-			} else {
-				str.append("a name ");
+		try {
+			FileOutputStream fos = new FileOutputStream("test.txt", true);
+			FileLock fl = fos.getChannel().tryLock();
+			if (fl != null) {
+				Vector<Ship> ships = searchWorkingDir(searchTerm, searchField);
+				for (Ship ship : ships) { // print out information about ships
+					System.out.println(ship.toString());
+				}
 			}
-			str.append("matching ");
-			str.append(searchTerm);
-			bw.append(str.toString());
-			bw.close();
+			FileWriter fw = new FileWriter(fos.getFD());
+			StringBuffer logRecord = new StringBuffer("search was made for ships with ");
+			if (searchField == 0){
+				logRecord.append("mmsi ");
+			}else {
+				logRecord.append("name ");
+			}
+			logRecord.append(searchTerm);
+			logRecord.append("\n");
+			fw.write(logRecord.toString());
 		} catch (IOException e) {
-			e.printStackTrace();
-		}
 
+		}
 	}
 
 	/**

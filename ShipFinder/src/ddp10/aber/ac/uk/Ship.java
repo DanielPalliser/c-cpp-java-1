@@ -6,7 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 
 public class Ship {
-
+ 
 	private String mmsi;
 	private String name;
 	private Float lat;
