@@ -2,60 +2,48 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "navigation.h"
-#include "main.h"
+#include "ships.h"
+#include "linkedlist.h"
 
-void display_node(node *node);
+void add_ship(ship **head, ship *new, int *listsize) {
 
-node *make_node(char *ais_id, double lat, double lng, double course, double speed) {
-    node *new_ship;
-    new_ship = malloc(sizeof (node));
-    strcpy(new_ship->ais_id, ais_id);
-    new_ship->loc.lat = lat;
-    new_ship->loc.lng = lng;
-    new_ship->course = course;
-    new_ship->speed = speed;
-    new_ship->sunk = 0;
-    return new_ship;
+	if (NULL == *head) {
+		*head = new;
+	} else {
+		new->next = *head;
+		*head = new;
+	}
+	(*listsize)++;
 }
 
-void add_node(node **head, node *new) {
-
-    if (NULL == *head) {
-        *head = new;
-    } else {
-        new->next = *head;
-        *head = new;
-    }
+void display_list(ship **head, int listsize) {
+	int i;
+	ship *current = *head;
+	for (i = 0; i < listsize; i++) {
+		display_ship(current);
+		current = current->next;
+	}
 }
 
-void display_list(node **head, int listsize) {
-    int i;
-    node *current = *head;
-    for (i = 0; i < listsize; i++) {
-        display_node(current);
-        current = current->next;
-    }
+void display_ship(ship *ship) {
+	printf("\nAIS ID:%d\nLatitude:%f\nLongditude:%f\n", ship->mmsi, ship->lat,
+			ship->lng);
 }
 
-void display_node(node *node) {
-    printf("\nAIS ID:%s\nLatitude:%lf\nLongditude:%lf\n",
-            node->ais_id,
-            node->loc.lat,
-            node->loc.lng);
-}
-
-void remove_node(node **head) {
-    node *curr, *prev = NULL;
-    for (curr = *head; curr != NULL; prev = curr, curr = curr->next) {
-        if (curr->in_area == 1 || curr->sunk) {
-            if (prev == NULL) {
-                (*head) = (*head)->next;
-            } else {
-                prev->next = curr->next;
-            }
-            free(curr);
-        }
-    }
+void remove_ships(ship **head, int *listsize) {
+	if (1 == *listsize) {
+		free(*head);
+		*head = NULL;
+	} else {
+		ship *previous;
+		int i;
+		ship *current = *head;
+		for (i = 0; i < *listsize; i++) {
+			previous = current;
+			current = current->next;
+			free(previous);
+			previous = NULL;
+		}
+	}*listsize = 0;
 }
 

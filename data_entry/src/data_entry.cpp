@@ -9,31 +9,19 @@
 #include <fstream>
 #include <string>
 #include <sstream>
-#include "data_entry.hpp"
+#include "data_entry.h"
+
+#define WEST_BRDR -6.5
+#define	EAST_BRDR -4.75
+#define NORTH_BRDR 52.75
+#define SOUTH_BRDR 51.5
+
 using namespace std;
 
 /**
  * this class allows a user to input information about a ship and save that information to a file.
  * The program also outputs to a log file
  */
-class data_entry {
-public:
-	data_entry();
-	void runMenu();
-private:
-	int mmsi, course;
-	std::string response;
-	float lat, lng, speed;
-	char name[256];
-	void getInput(char* destination, std::string prompt);
-	void writeShipFile();
-	void getInformation();
-
-	template<typename Type>
-	void getInput(Type &destination, std::string prompt);
-
-};
-
 data_entry::data_entry() {
 
 }
@@ -60,7 +48,7 @@ void data_entry::getInput(Type &destination, std::string prompt) {
 		std::cout << prompt;
 		char temporaryHolder[256];
 		std::stringstream stringStream;
-		cin.getline(temporaryHolder,256,'\n');
+		cin.getline(temporaryHolder, 256, '\n');
 		stringStream << temporaryHolder;
 		if (stringStream >> destination) {
 			break;
@@ -70,9 +58,8 @@ void data_entry::getInput(Type &destination, std::string prompt) {
 
 void data_entry::getInput(char* destination, std::string prompt) {
 	cout << prompt;
-	cin.getline(destination,256);
+	cin.getline(destination, 256);
 }
-
 
 /**
  * writes a ship file from the data input by the user
@@ -92,6 +79,15 @@ void data_entry::writeShipFile() {
 		} else {
 			/* Handle unexpected error */;
 		}
+	} else if (lng < WEST_BRDR || EAST_BRDR < lng || lat < SOUTH_BRDR
+			|| NORTH_BRDR < lat) {
+		{
+			cout << "ship with mmsi: " << mmsi << " left the area. Deleting file if it exists";
+			std::stringstream tmpstr;
+			tmpstr << mmsi << ".shp";
+			string filename = tmpstr.str();
+			remove(filename.c_str());
+		}
 	} else {
 		std::stringstream tmpstr;
 		tmpstr << mmsi << ".shp";
@@ -104,7 +100,8 @@ void data_entry::writeShipFile() {
 		time_t t = time(NULL); //current time
 		struct tm* now = gmtime(&t);
 		stringstream logstrm;
-		logstrm << asctime(now) << " Ship with mmsi " << mmsi << " was updated"<< endl;
+		logstrm << asctime(now) << " Ship with mmsi " << mmsi << " was updated"
+				<< endl;
 		string logstr = logstrm.str();
 		fprintf(log, "%s", logstr.c_str());
 		fcntl(fd, F_SETLKW, file_lock(F_UNLCK, SEEK_SET));
@@ -126,7 +123,7 @@ void data_entry::runMenu() {
 		switch (choice) {
 		case 'e':
 		case 'E':
-			cin.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
+			cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 			getInformation();
 			break;
 		case 's':

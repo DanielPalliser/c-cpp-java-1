@@ -1,7 +1,7 @@
 /*
- * ships.h
+ * main.h
  *
- *  Created on: Mar 26, 2012
+ *  Created on: Mar 30, 2012
  *      Author: dan
  */
 #include <dirent.h>
@@ -10,15 +10,7 @@
 #ifndef SHIPS_H_
 #define SHIPS_H_
 
-struct flock* file_lock(short type, short whence) {
-    static struct flock ret;
-    ret.l_type = type;
-    ret.l_start = 0;
-    ret.l_whence = whence;
-    ret.l_len = 0;
-    ret.l_pid = getpid();
-    return &ret;
-}
+
 
 typedef struct ship_struct {
 	int mmsi;
@@ -27,11 +19,15 @@ typedef struct ship_struct {
 	float lng;
 	int course;
 	float speed;
+	struct ship_struct *next;
 }ship;
 
+
+struct flock* file_lock(short type, short whence);
 void run_menu(void);
 void get_input(char *prompt, float *pointer);
 void compare_locs(ship* ships, int num_ships,float lat,float lng);
 ship *read_ship(struct dirent *file);
-int get_ships(ship* ships);
+int get_ships(ship** ships);
+
 #endif /* SHIPS_H_ */
