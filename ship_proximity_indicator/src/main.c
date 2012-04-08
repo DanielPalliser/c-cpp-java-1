@@ -33,7 +33,7 @@ int main() {
 }
 
 void run_menu(void) {
-	float lat = 1000, lng = 1000;
+	float lat = 1000.0, lng = 1000.0;
 	char choice = '\0';
 	while ('q' != choice && 'Q' != choice) { //loop through menu
 		puts("\nEnter a choice: \nL : enter location\nP : check proximity\nQ : quit");
@@ -65,7 +65,7 @@ void run_menu(void) {
 void get_input(char *prompt, float *pointer) {
 	int done = 0;
 	puts(prompt);
-	done = scanf("%f", pointer);
+	done = scanf(" %f", pointer);
 	if (done != 1) {
 		*pointer = 1000.0; // set to invalid lat or lng
 		puts("invalid input");

@@ -5,25 +5,26 @@
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
+#include <math.h>
+#include <time.h>
 
 #include "ships.h"
 #include "linkedlist.h"
-
 
 #define LAT_MIN_PROX 0.1001 //added 0.0001 to compensate for inaccuracy of floats
 #define LNG_MIN_PROX 0.2001
 
 struct flock* file_lock(short type, short whence) {
-    static struct flock ret;
-    ret.l_type = type;
-    ret.l_start = 0;
-    ret.l_whence = whence;
-    ret.l_len = 0;
-    ret.l_pid = getpid();
-    return &ret;
+	static struct flock ret;
+	ret.l_type = type;
+	ret.l_start = 0;
+	ret.l_whence = whence;
+	ret.l_len = 0;
+	ret.l_pid = getpid();
+	return &ret;
 }
 
-void compare_locs(ship *ships, int num_ships, float lat, float lng) {
+void compare_locs(ship *ships, int num_ships, float given_lat, float given_lng) {
 	int fd = open("log.txt", (O_RDWR | O_CREAT | O_APPEND), 0664); //attempt to find log.
 	if (fd == -1) {
 		printf("File descriptor error");
@@ -40,20 +41,21 @@ void compare_locs(ship *ships, int num_ships, float lat, float lng) {
 			/* Handle unexpected error */;
 		}
 	} else { //if file is locked by this program then run ship comparisons
-		puts("OK we have the lock\n\n");
 		FILE* log = fdopen(fd, "a");
-		fprintf(log,
-				"proximity indication check was made for point: %.3f lat %.3f lng",
-				LAT_MIN_PROX, LAT_MIN_PROX);
-		 ship *current = NULL;
-		    for (current = ships; current != NULL; current = current->next) {
-		    float lat_proximity = current->lat - lat;
-			float lng_proximity = current->lng - lng;
+		time_t t = time(NULL); //current time
+		char event[100] = "Proximity indication check was made for point: ";
+		fprintf(log, "\n %s %s %.3f lat %.3f lng", ctime(&t),event, given_lat,
+				given_lng);
+		ship *current = NULL;
+		for (current = ships; current != NULL; current = current->next) {
+			float lat_proximity =  given_lat - (*current).lat;
+			float lng_proximity =  given_lng - (*current).lng;
 			//compare ships to lat + lng
 			if (lat_proximity < LAT_MIN_PROX && lng_proximity < LNG_MIN_PROX) {
-				printf("ship with mmsi '%d' is close to the given point",
+				printf("\n Ship with MMSI: '%d' is close to the given point",
 						current->mmsi);
-				fprintf(log, "ship with mmsi '%d' is close to the given point",
+				fprintf(log,
+						"\n ship with MMSI: '%d' is close to the given point",
 						current->mmsi);
 			}
 		}
@@ -85,7 +87,7 @@ int get_ships(ship** ships) {
  */
 ship *read_ship(struct dirent *file) {
 	ship *sh = malloc(sizeof(ship));
-	char mmsi[10], name[40], lat[10], lng[10], course[5], speed[5];
+	char mmsi[255], name[255], lat[255], lng[255], course[255], speed[255];
 	FILE *fp = fopen(file->d_name, "r");
 	fgets(mmsi, sizeof(mmsi), fp);
 	fgets(name, sizeof(name), fp);

@@ -1,7 +1,7 @@
 package ddp10.aber.ac.uk;
 
-import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -40,35 +40,40 @@ public class ShipFinder {
 	}
 
 	private void search(Integer searchField) {
-		String searchTerm; // search for ships matching search term
-		searchTerm = scan.nextLine();
+		
 		try {
-			FileOutputStream fos = new FileOutputStream("log.txt", true);
-			FileLock fl = fos.getChannel().tryLock();
+			//using output stream causes lock to fail for unknown reason
+			FileInputStream fos = new FileInputStream("log.txt");
+			FileLock fl = fos.getChannel().tryLock(0L, Long.MAX_VALUE, true); 
 			if (fl != null) {
+				String searchTerm; // search for ships matching search term
+				searchTerm = scan.nextLine();
 				Vector<Ship> ships = searchWorkingDir(searchTerm, searchField);
 				for (Ship ship : ships) { // print out information about ships
 					System.out.println(ship.toString());
-					FileWriter fw = new FileWriter(fos.getFD());
-					DateFormat dateFormat = new SimpleDateFormat("EEE MMM DD HH:mm:ss yyyy");
-					Date date = new Date();
-					StringBuffer logRecord = new StringBuffer(dateFormat.format(date));
-					logRecord.append("\n Search was made for ships with ");
-					if (searchField == 0){
-						logRecord.append("mmsi of");
-					}else {
-						logRecord.append("name of");
-					}
-					logRecord.append(searchTerm);
-					logRecord.append("\n");
-					fw.write(logRecord.toString());
-					fl.release();
-					fw.close();
+					
+					
 				}
-			}else System.out.println("Another program is accessing ship files");
-			
-		} catch (IOException e) {
+				
+				FileWriter fw = new FileWriter("log.txt",true);
+				Date date = new Date();
+				DateFormat dateFormat = new SimpleDateFormat("EEE MMM DD HH:mm:ss yyyy");
+				StringBuffer logRecord = new StringBuffer(dateFormat.format(date));
+				logRecord.append("\n Search was made for ships with ");
+				if (searchField == 0){
+					logRecord.append("mmsi of ");
+				}else {
+					logRecord.append("name of ");
+				}
+				logRecord.append(searchTerm);
+				logRecord.append("\n");
+				fw.write(logRecord.toString());
+				fl.release();
+				fw.close();
+			}else {System.out.println("Another program is accessing ship files, cannot perform search");
 
+			fos.close();}
+		} catch (IOException e) {
 		}
 	}
 
@@ -85,7 +90,7 @@ public class ShipFinder {
 		File workingDir = new File(System.getProperty("user.dir"));
 		String[] children = workingDir.list();
 		for (String s : children) { // for each file
-			if (s.matches(".\\.shp")) { // check file is a ship file
+			if (s.matches(".*.shp")) { // check file is a ship file
 				File shipFile = new File(s); // try to read in file
 				try {
 					Ship ship = new Ship(shipFile);
@@ -93,7 +98,7 @@ public class ShipFinder {
 						foundShips.add(ship); // matches search term
 					}
 				} catch (FileNotFoundException e) {
-					System.err.println("filcheck e not found");
+					System.err.println("file not found");
 				} catch (IOException e) {
 					System.err.println("error reading file");
 				}

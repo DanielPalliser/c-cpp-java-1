@@ -82,7 +82,20 @@ void data_entry::writeShipFile() {
 	} else if (lng < WEST_BRDR || EAST_BRDR < lng || lat < SOUTH_BRDR
 			|| NORTH_BRDR < lat) {
 		{
-			cout << "ship with mmsi: " << mmsi << " left the area. Deleting file if it exists";
+
+			stringstream logstrm;
+
+			cout << "ship with mmsi: " << mmsi
+					<< " left the area. Deleting file if it exists" << endl;
+			time_t t = time(NULL); //current time
+			struct tm* now = gmtime(&t);
+			logstrm << asctime(now) << "ship with mmsi: " << mmsi
+					<< " left the area. Deleting file if it exists" << endl;
+			string logstr = logstrm.str(); // generate string to be written to file
+			FILE* log = fdopen(fd, "a");
+			fprintf(log, "%s", logstr.c_str()); // write to log file
+			fcntl(fd, F_SETLKW, file_lock(F_UNLCK, SEEK_SET));
+			fclose(log);
 			std::stringstream tmpstr;
 			tmpstr << mmsi << ".shp";
 			string filename = tmpstr.str();

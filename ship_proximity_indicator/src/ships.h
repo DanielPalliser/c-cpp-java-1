@@ -15,8 +15,8 @@
 typedef struct ship_struct {
 	int mmsi;
 	char name[31];
-	float lat;
-	float lng;
+	double lat;
+	double lng;
 	int course;
 	float speed;
 	struct ship_struct *next;

@@ -37,7 +37,6 @@ private:
 
 	template<typename Type>
 	void getInput(Type &destination, std::string prompt);
-
 };
 
 /*

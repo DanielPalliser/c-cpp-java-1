@@ -53,7 +53,7 @@ public class Ship {
 
 	public Boolean matches(String searchTerm, int field) {
 		Boolean ret = false;
-		if (0 == field && name.contains(searchTerm)) {
+		if (0 == field && mmsi.contains(searchTerm)) {
 			ret = true;
 		} else if (1 == field && name.contains(searchTerm)){
 			ret = true;
